@@ -1,0 +1,9 @@
+{
+  "name": "meal-booking-backend",
+  "version": "1.0.0",
+  "description": "Backend for Meal Booking App",
+  "dependencies": {
+    "@netlify/blobs": "^7.9.0",
+    "@netlify/functions": "^2.6.0"
+  }
+}
