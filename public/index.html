@@ -1,19 +1,316 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تطبيق حجز الوجبات</title>
-    <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background-color: #f9f9f9; }
-        .container { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); max-width: 400px; margin: auto; }
-        button { background-color: #4CAF50; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 16px; margin-top: 20px; }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>حجز الوجبات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#FAF6EE;
+    --ink:#2C2620;
+    --olive:#5C6B3B;
+    --olive-dark:#46512C;
+    --mustard:#D6A322;
+    --line:#E6DFCF;
+    --card:#FFFFFF;
+  }
+  *{ box-sizing:border-box; }
+  body{
+    margin:0;
+    font-family:'Tajawal', sans-serif;
+    background:var(--cream);
+    color:var(--ink);
+    min-height:100vh;
+  }
+  .wrap{ max-width:520px; margin:0 auto; padding:22px 18px 60px; }
+
+  header.top{ text-align:center; padding:18px 0 26px; }
+  header.top .eyebrow{
+    font-size:13px; letter-spacing:.5px; color:var(--olive-dark);
+    font-weight:700; text-transform:uppercase;
+  }
+  header.top h1{
+    margin:6px 0 4px; font-size:26px; font-weight:900; color:var(--ink);
+  }
+  header.top p{ margin:0; color:#7A7263; font-size:14px; }
+
+  .tabs{
+    display:flex; background:var(--card); border:1px solid var(--line);
+    border-radius:14px; padding:4px; gap:4px; margin-bottom:18px;
+  }
+  .tab-btn{
+    flex:1; border:none; background:transparent; padding:10px 8px;
+    font-family:inherit; font-weight:700; font-size:14px; color:#8A8272;
+    border-radius:10px; cursor:pointer; transition:.2s;
+  }
+  .tab-btn.active{ background:var(--olive); color:#fff; }
+
+  .card{
+    background:var(--card); border:1px solid var(--line); border-radius:18px;
+    padding:20px; margin-bottom:16px;
+  }
+  .card h2{ margin:0 0 4px; font-size:17px; font-weight:800; }
+  .card .sub{ margin:0 0 16px; font-size:13px; color:#8A8272; }
+
+  label.field-label{ display:block; font-size:13px; font-weight:700; margin:14px 0 6px; color:var(--ink); }
+  input[type=text], textarea{
+    width:100%; border:1px solid var(--line); border-radius:12px; padding:12px 14px;
+    font-family:inherit; font-size:15px; background:#FDFCFA; color:var(--ink);
+  }
+  textarea{ min-height:80px; resize:vertical; }
+  input:focus, textarea:focus{ outline:2px solid var(--olive); outline-offset:1px; }
+
+  .choices{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:6px; }
+  .choice{
+    border:1.5px solid var(--line); border-radius:14px; padding:14px 10px;
+    text-align:center; cursor:pointer; transition:.15s; background:#FDFCFA;
+  }
+  .choice .emoji{ font-size:22px; display:block; margin-bottom:4px; }
+  .choice span.txt{ font-size:13px; font-weight:700; }
+  .choice.selected{ border-color:var(--olive); background:#EEF1E5; }
+
+  button.primary{
+    width:100%; margin-top:18px; background:var(--olive); color:#fff; border:none;
+    padding:14px; border-radius:14px; font-family:inherit; font-weight:800; font-size:15px;
+    cursor:pointer; transition:.15s;
+  }
+  button.primary:hover{ background:var(--olive-dark); }
+  button.primary:disabled{ opacity:.55; cursor:default; }
+
+  .status-msg{ margin-top:12px; font-size:13.5px; padding:10px 12px; border-radius:10px; display:none; }
+  .status-msg.ok{ background:#EEF3E4; color:var(--olive-dark); display:block; }
+  .status-msg.err{ background:#FBEAEA; color:#9A3B3B; display:block; }
+
+  .reg-link{
+    display:block; text-align:center; margin-top:14px; background:var(--mustard);
+    color:#3A2E05; text-decoration:none; padding:13px; border-radius:14px; font-weight:800;
+  }
+
+  .stats-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px; }
+  .stat-box{
+    border:1px solid var(--line); border-radius:14px; padding:14px; text-align:center; background:#FDFCFA;
+  }
+  .stat-box .num{ font-size:26px; font-weight:900; color:var(--olive-dark); }
+  .stat-box .lbl{ font-size:12.5px; color:#8A8272; font-weight:700; margin-top:2px; }
+
+  .notes-list{ display:flex; flex-direction:column; gap:8px; }
+  .note-item{ border:1px solid var(--line); border-radius:12px; padding:10px 12px; background:#FDFCFA; }
+  .note-item .n-name{ font-weight:800; font-size:13.5px; }
+  .note-item .n-choice{ font-size:12px; color:var(--olive-dark); font-weight:700; }
+  .note-item .n-text{ font-size:13px; color:#5c564a; margin-top:4px; }
+  .empty{ text-align:center; color:#a19a89; font-size:13.5px; padding:14px 0; }
+
+  .date-tag{ font-size:12.5px; color:#8A8272; text-align:center; margin-bottom:10px; }
+  .refresh-btn{
+    display:block; margin:0 auto 14px; background:transparent; border:1px solid var(--line);
+    color:var(--olive-dark); font-weight:700; font-size:13px; padding:8px 16px; border-radius:10px;
+    font-family:inherit; cursor:pointer;
+  }
+</style>
 </head>
 <body>
-    <div class="container">
-        <h2>مرحباً بك في تطبيق حجز الوجبات 🍽️</h2>
-        <p>التطبيق يعمل الآن بنجاح على الخادم!</p>
+<div class="wrap">
+  <header class="top">
+    <div class="eyebrow">حجز الوجبات اليومي</div>
+    <h1>🍽️ غداء أو عشاء؟</h1>
+    <p>سجّل اختيارك اليوم، ونذكّرك كل صباح</p>
+  </header>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="submit">تسجيل اليوم</button>
+    <button class="tab-btn" data-tab="dashboard">لوحة المتابعة</button>
+  </div>
+
+  <!-- ============ تبويب التسجيل ============ -->
+  <div id="tab-submit">
+
+    <div class="card" id="regCard">
+      <h2>الخطوة 1 — التفعيل عبر تيليجرام</h2>
+      <p class="sub">مرة واحدة فقط، لتصلك التذكيرات اليومية</p>
+      <label class="field-label">الاسم الكامل</label>
+      <input type="text" id="regName" placeholder="مثال: أحمد بلقاسم" />
+      <button class="primary" id="regBtn">تفعيل التذكير عبر تيليجرام</button>
+      <div class="status-msg" id="regStatus"></div>
+      <a href="#" id="telegramLink" class="reg-link" style="display:none;" target="_blank">فتح تيليجرام وتفعيل التذكير ✅</a>
     </div>
+
+    <div class="card">
+      <h2>الخطوة 2 — اختيارك اليوم</h2>
+      <p class="sub">اختر ما تريده اليوم</p>
+      <label class="field-label">الاسم</label>
+      <input type="text" id="subName" placeholder="اكتب اسمك" />
+
+      <label class="field-label">وجبتك اليوم</label>
+      <div class="choices" id="choiceGrid">
+        <div class="choice" data-val="lunch"><span class="emoji">☀️</span><span class="txt">غداء فقط</span></div>
+        <div class="choice" data-val="dinner"><span class="emoji">🌙</span><span class="txt">عشاء فقط</span></div>
+        <div class="choice" data-val="both"><span class="emoji">🍽️</span><span class="txt">الاثنان معاً</span></div>
+        <div class="choice" data-val="none"><span class="emoji">🚫</span><span class="txt">لا شيء اليوم</span></div>
+      </div>
+
+      <label class="field-label">ملاحظات (اختياري)</label>
+      <textarea id="subNotes" placeholder="مثال: بدون فلفل، أو موعد التسليم..."></textarea>
+
+      <button class="primary" id="subBtn">إرسال اختياري</button>
+      <div class="status-msg" id="subStatus"></div>
+    </div>
+  </div>
+
+  <!-- ============ تبويب لوحة المتابعة ============ -->
+  <div id="tab-dashboard" style="display:none;">
+    <div class="card">
+      <div class="date-tag" id="dashDate">—</div>
+      <button class="refresh-btn" id="refreshBtn">تحديث ↻</button>
+      <div class="stats-grid">
+        <div class="stat-box"><div class="num" id="cLunch">0</div><div class="lbl">غداء فقط</div></div>
+        <div class="stat-box"><div class="num" id="cDinner">0</div><div class="lbl">عشاء فقط</div></div>
+        <div class="stat-box"><div class="num" id="cBoth">0</div><div class="lbl">الاثنان معاً</div></div>
+        <div class="stat-box"><div class="num" id="cNone">0</div><div class="lbl">لا شيء</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>التفاصيل والملاحظات</h2>
+      <div class="notes-list" id="notesList">
+        <div class="empty">لا توجد تسجيلات بعد اليوم</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const CHOICE_LABELS = { lunch:"غداء فقط", dinner:"عشاء فقط", both:"الاثنان معاً", none:"لا شيء" };
+
+// ---------- تبويبات ----------
+document.querySelectorAll(".tab-btn").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    const tab = btn.dataset.tab;
+    document.getElementById("tab-submit").style.display = tab==="submit" ? "block":"none";
+    document.getElementById("tab-dashboard").style.display = tab==="dashboard" ? "block":"none";
+    if(tab==="dashboard") loadStats();
+  });
+});
+
+// ---------- استرجاع الاسم المحفوظ ----------
+const savedName = localStorage.getItem("meal_app_name");
+if(savedName){
+  document.getElementById("subName").value = savedName;
+  document.getElementById("regName").value = savedName;
+}
+
+// إخفاء بطاقة التسجيل إذا كان مفعّلاً من قبل
+if(localStorage.getItem("meal_app_registered") === "1"){
+  document.getElementById("regCard").style.opacity = "0.6";
+}
+
+// ---------- التسجيل عبر تيليجرام ----------
+document.getElementById("regBtn").addEventListener("click", async ()=>{
+  const name = document.getElementById("regName").value.trim();
+  const statusEl = document.getElementById("regStatus");
+  if(!name){
+    statusEl.className="status-msg err"; statusEl.textContent="الرجاء إدخال الاسم"; return;
+  }
+  try{
+    const res = await fetch("/api/register", {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ name })
+    });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || "خطأ");
+
+    localStorage.setItem("meal_app_name", name);
+    localStorage.setItem("meal_app_registered", "1");
+    document.getElementById("subName").value = name;
+
+    const link = document.getElementById("telegramLink");
+    link.href = data.deepLink;
+    link.style.display = "block";
+    statusEl.className="status-msg ok";
+    statusEl.textContent="اضغط الزر أدناه لفتح تيليجرام وإتمام التفعيل";
+  }catch(e){
+    statusEl.className="status-msg err";
+    statusEl.textContent = e.message || "تعذر الاتصال بالخادم";
+  }
+});
+
+// ---------- اختيار الوجبة ----------
+let selectedChoice = null;
+document.querySelectorAll(".choice").forEach(el=>{
+  el.addEventListener("click", ()=>{
+    document.querySelectorAll(".choice").forEach(c=>c.classList.remove("selected"));
+    el.classList.add("selected");
+    selectedChoice = el.dataset.val;
+  });
+});
+
+document.getElementById("subBtn").addEventListener("click", async ()=>{
+  const name = document.getElementById("subName").value.trim();
+  const notes = document.getElementById("subNotes").value.trim();
+  const statusEl = document.getElementById("subStatus");
+
+  if(!name){ statusEl.className="status-msg err"; statusEl.textContent="الرجاء إدخال الاسم"; return; }
+  if(!selectedChoice){ statusEl.className="status-msg err"; statusEl.textContent="الرجاء اختيار الوجبة"; return; }
+
+  try{
+    const res = await fetch("/api/submit", {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ name, choice: selectedChoice, notes })
+    });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || "خطأ");
+
+    localStorage.setItem("meal_app_name", name);
+    statusEl.className="status-msg ok";
+    statusEl.textContent="تم تسجيل اختيارك بنجاح ✅";
+  }catch(e){
+    statusEl.className="status-msg err";
+    statusEl.textContent = e.message || "تعذر الاتصال بالخادم";
+  }
+});
+
+// ---------- لوحة المتابعة ----------
+document.getElementById("refreshBtn").addEventListener("click", loadStats);
+
+async function loadStats(){
+  try{
+    const res = await fetch("/api/stats");
+    const data = await res.json();
+    document.getElementById("dashDate").textContent = "تاريخ اليوم: " + data.date;
+    document.getElementById("cLunch").textContent = data.counts.lunch || 0;
+    document.getElementById("cDinner").textContent = data.counts.dinner || 0;
+    document.getElementById("cBoth").textContent = data.counts.both || 0;
+    document.getElementById("cNone").textContent = data.counts.none || 0;
+
+    const list = document.getElementById("notesList");
+    list.innerHTML = "";
+    if(!data.responses || data.responses.length===0){
+      list.innerHTML = '<div class="empty">لا توجد تسجيلات بعد اليوم</div>';
+      return;
+    }
+    data.responses.forEach(r=>{
+      const div = document.createElement("div");
+      div.className = "note-item";
+      div.innerHTML = `
+        <div class="n-name">${escapeHtml(r.name)}</div>
+        <div class="n-choice">${CHOICE_LABELS[r.choice] || r.choice}</div>
+        ${r.notes ? `<div class="n-text">${escapeHtml(r.notes)}</div>` : ""}
+      `;
+      list.appendChild(div);
+    });
+  }catch(e){
+    document.getElementById("notesList").innerHTML = '<div class="empty">تعذر تحميل البيانات</div>';
+  }
+}
+
+function escapeHtml(str){
+  const d = document.createElement("div");
+  d.textContent = str;
+  return d.innerHTML;
+}
+</script>
 </body>
 </html>
